@@ -1,1 +1,1 @@
-web: python3 iraisboredbot.py
+worker: python3 iraisboredbot.py
