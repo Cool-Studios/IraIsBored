@@ -1,1 +1,1 @@
-web: python3 iraisboredbot.py
+bot: python3 iraisboredbot.py
