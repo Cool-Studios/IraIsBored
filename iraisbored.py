@@ -39,7 +39,7 @@ def search_instants(query):
        Params:
            query: String to search
     """
-    query_string = "+".join(query) if isinstance(query, list) else query.replace(" ", "+")
+    query_string = " ".join(query) if isinstance(query, list) else query.replace(" ", "+")
     url = BASE_URL.format(SEARCH_URL.format(query_string))
 
     req = requests.get(url)

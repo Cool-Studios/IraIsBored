@@ -59,7 +59,7 @@ def inlinequery(bot, update):
                                                      title=instant["text"],
                                                      voice_url=instant["url"]))
 
-    bot.answerInlineQuery(update.inline_query.id, results=inline_results[:100])
+    bot.answerInlineQuery(update.inline_query.id, results=inline_results[:40])
 
 
 def track(update):
