@@ -37,13 +37,13 @@ def start(bot, update):
 
 def help_command(bot, update):
     """Help command"""
-    bot.sendMessage(update.message.chat_id, text='This bot search sounds in myinstants.com\n'
+    bot.sendMessage(update.message.chat_id, text='This bot search sounds all over the internet!\n'
                                                  'You can use it in any chat, just type '
-                                                 '@IraIsBored query message')
+                                                 '@IraIsBoredBot query message')
 
 def info_command(bot, update):
     """Info command"""
-    bot.sendMessage(update.message.chat_id, text='Developed for the entertainment of my girlfriend Ira '
+    bot.sendMessage(update.message.chat_id, text='Developed for the entertainment of my girlfriend Ira!\n'
                                                  'Developer: @LeMoiNat')
 
 @run_async
@@ -85,7 +85,7 @@ def remove_sound_file(filename):
 @run_async
 def upload_start(bot, update):
     """First state of the upload instant state machine"""
-    update.message.reply_text("Ok, you want to upload a sound to Myinstants.\n"
+    update.message.reply_text("Ok, you want to upload a sound.\n"
                               "First, send me the sound you want to upload, it can be a voice message or an audio file, "
                               "as long it is smaller than 300kb.\n\n"
                               "Use the command /cancel to abort the upload.")
@@ -106,7 +106,7 @@ def get_voice(bot, update, user_data):
     user_data['filename'] = filename
 
     update.message.reply_text("Nice, everything is fine with your audio!\n"
-                              "Now send me a name for it, this name will appear on myinstants site "
+                              "Now send me a name for it, this name will searchable on this bot. "
                               "and you will search by this name when you want to send it.")
     return NAME
 
@@ -124,7 +124,7 @@ def get_audio(bot, update, user_data):
     user_data['filename'] = filename
 
     update.message.reply_text("Nice, everything is fine with your audio!\n"
-                              "Now send me a name for it, this name will appear on myinstants site "
+                              "Now send me a name for it, this name will searchable on this bot. "
                               "and you will search by this name when you want to send it.")
 
     return NAME
@@ -134,7 +134,7 @@ def get_name(bot, update, user_data):
     """Handler for instant name"""
     user_data['name'] = update.message.text
 
-    update.message.reply_text("Your instant name will be \"{}\".\nAre you sure about it? Send Yes, No or /cancel".format(user_data['name']))
+    update.message.reply_text("Your upload name will be \"{}\".\nAre you sure about it? Send Yes, No or /cancel".format(user_data['name']))
 
     return CONFIRMATION
 
@@ -155,18 +155,18 @@ def name_confirmation_and_upload(bot, update, user_data):
     try:
         upload_instant(user_data['name'], user_data['filename'])
     except NameAlreadyExistsException:
-        update.message.reply_text("Error: There is already an Instant with this name!\nSend me another name or /cancel to abort.")
+        update.message.reply_text("Error: There is already an upload with this name!\nSend me another name or /cancel to abort.")
         return NAME
     except FileSizeException:
         update.message.reply_text("Error: File is bigger than 300kb!\nSend me another audio or /cancel to abort.")
         return SOUND
     except HTTPErrorException:
-        update.message.reply_text("Error: Failed to send Instant, try again later.\nIf the problem persist talk to the developer @heylouiz")
+        update.message.reply_text("Error: Failed to upload, try again later.\nIf the problem persist talk to the developer @LeMoiNat")
         remove_sound_file(user_data['filename'])
         user_data.clear()
         return ConversationHandler.END
 
-    update.message.reply_text("Instant was successfully sent, you should be able to search for it in a while.\n"
+    update.message.reply_text("Successfully uploaded, you should be able to search for it in a while.\n"
                               "See you later!")
 
     # Remove temporary file
@@ -193,7 +193,7 @@ def cancel(bot, update, user_data):
 def main():
     """Main function"""
     # Create the Updater and pass the bot token.
-    updater = Updater(os.environ["833369496:AAFi26_iNcNj1tQ0OBxavgdEORXgfsh00F4"])
+    updater = Updater("833369496:AAFi26_iNcNj1tQ0OBxavgdEORXgfsh00F4")
 
     # on different commands - answer in Telegram
     updater.dispatcher.add_handler(CommandHandler("start", start))

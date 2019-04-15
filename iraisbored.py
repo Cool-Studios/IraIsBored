@@ -1,7 +1,7 @@
 #!/bin/env python
 
 """
-    Module that search sounds in www.myinstants.com
+    Module that search sounds from different sources.
 """
 
 import re
