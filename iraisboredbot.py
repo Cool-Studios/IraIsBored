@@ -193,7 +193,7 @@ def cancel(bot, update, user_data):
 def main():
     """Main function"""
     # Create the Updater and pass the bot token.
-    updater = Updater("833369496:AAFi26_iNcNj1tQ0OBxavgdEORXgfsh00F4")
+    updater = Updater(os.environ["TELEGRAM_TOKEN"])
 
     # on different commands - answer in Telegram
     updater.dispatcher.add_handler(CommandHandler("start", start))
