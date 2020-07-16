@@ -18,7 +18,7 @@ from telegram import InlineQueryResultVoice, Message, Chat
 from telegram.ext import Updater, Filters, InlineQueryHandler, CommandHandler, MessageHandler, ConversationHandler
 from telegram.ext.dispatcher import run_async
 
-from myinstants import search_instants, upload_instant, NameAlreadyExistsException, FileSizeException, HTTPErrorException, InvalidPageErrorException, LoginErrorException
+from iraisbored import search_instants, upload_instant, NameAlreadyExistsException, FileSizeException, HTTPErrorException, InvalidPageErrorException, LoginErrorException
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
