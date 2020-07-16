@@ -15,6 +15,7 @@ import os
 BASE_URL = "https://www.myinstants.com/{}"
 SEARCH_URL = "search/?name={}"
 UPLOAD_URL = 'https://www.myinstants.com/new/'
+LOGIN_URL = "https://www.myinstants.com/accounts/login/"
 
 MP3_MATCH = re.compile(r"play\('(.*?)'\)")
 
@@ -34,12 +35,20 @@ class FileSizeException(MyInstantsApiException):
     """Exception throw when the instants file size is bigger than supported"""
     pass
 
+class LoginErrorException(MyInstantsApiException):
+    """Exception thrown when the login failed"""
+    pass
+
+class InvalidPageErrorException(MyInstantsApiException):
+    """Exception thrown when an invalid page is downloaded"""
+    pass
+
 def search_instants(query):
     """Search instant
        Params:
            query: String to search
     """
-    query_string = " ".join(query) if isinstance(query, list) else query.replace(" ", "+")
+    query_string = "+".join(query) if isinstance(query, list) else query.replace(" ", "+")
     url = BASE_URL.format(SEARCH_URL.format(query_string))
 
     req = requests.get(url)
@@ -50,7 +59,7 @@ def search_instants(query):
     soup = BeautifulSoup(req.text, "html.parser")
     response = []
     for div_obj in soup.find_all("div", class_="instant"):
-        text = div_obj.find("a", attrs={"style": "text-decoration: underline; font-size: 14px;"}).string
+        text = div_obj.find("a", class_="instant-link").string
         mp3 = MP3_MATCH.search(div_obj.find("div", class_="small-button")["onmousedown"]).group(1)
         url = BASE_URL.format(mp3)
         response.append({"text": text,
@@ -64,26 +73,63 @@ def upload_instant(name, filepath):
             name: Name of the instants to be uploaded
             filepath: Path of the sound file to be uploaded
     """
-    client = requests.session()
 
-    r = client.get(UPLOAD_URL)
+    # Create session and get cookies
+    session = requests.session()
+    session.get(LOGIN_URL)
 
-    token = client.cookies['csrftoken']
+    data = {
+        "csrfmiddlewaretoken": session.cookies["csrftoken"],
+        "username": os.environ["MYINSTANTS_USERNAME"],
+        "password": os.environ["MYINSTANTS_PASSWORD"],
+        "action": "",
+        "next": "",
+    }
 
-    cookies = dict(csrftoken=token)
+    # Login
+    r = session.post(LOGIN_URL, data=data)
+
+    if r.status_code != 200:
+        raise LoginErrorException
+
+    r = session.get(UPLOAD_URL)
+
+    if r.status_code != 200:
+        raise HTTPErrorException
+
+    # Get upload token
+    soup = BeautifulSoup(r.text, "html.parser")
+    token = soup.find("input", {'name': 'csrfmiddlewaretoken'}).get('value')
+
+    if not token:
+        raise InvalidPageErrorException
 
     filename = os.path.basename(filepath)
 
-    multipart_data = MultipartEncoder(fields={'csrfmiddlewaretoken': token,
-                                              'name': name,
-                                              'sound': (filename, open(filepath, 'rb'), 'audio/mpeg'),
-                                              'image': ('', None, ''),
-                                              'color': '00FF00',
-                                              'description': ''})
+    multipart_data = MultipartEncoder(
+        fields={
+            "csrfmiddlewaretoken": token,
+            "name": name,
+            "sound": (
+                filename,
+                open(filepath, "rb"),
+                "audio/mpeg",
+            ),
+            "image": ("", None, ""),
+            "color": "00FF00",
+            "category": "",
+            "description": "",
+            "tags": "",
+            "accept_terms": "on",
+        }
+    )
 
-    response = requests.post(UPLOAD_URL, data=multipart_data, cookies=cookies,
-                             headers={'Content-Type': multipart_data.content_type,
-                             'Referer': UPLOAD_URL})
+    # Upload sound
+    response = session.post(
+        UPLOAD_URL,
+        data=multipart_data,
+        headers={"Content-Type": multipart_data.content_type, "Referer": UPLOAD_URL},
+    )
 
     soup = BeautifulSoup(response.text, "html.parser")
     for ul_obj in soup.find_all("ul", class_="errorlist"):
@@ -93,6 +139,9 @@ def upload_instant(name, filepath):
             raise FileSizeException
     if response.status_code != 200:
         raise HTTPErrorException
+
+    # Return sound url
+    return response.url
 
 def main():
     """Main function"""
@@ -106,4 +155,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
