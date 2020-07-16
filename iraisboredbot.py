@@ -203,7 +203,7 @@ def cancel(bot, update, user_data):
     return ConversationHandler.END
 
 def main():
-     """Main function"""
+    """Main function"""
 
     for var in ["MYINSTANTS_USERNAME", "MYINSTANTS_PASSWORD", "TELEGRAM_TOKEN"]:
         if var not in os.environ:
